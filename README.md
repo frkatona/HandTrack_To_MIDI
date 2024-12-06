@@ -1,10 +1,24 @@
-# Hand Track to MIDI
+# Hand Track to MIDI CC
 
-This project is a hand tracking system that uses a webcam to track the user's hand and convert the hand movements into MIDI signals. The system is built using Python and OpenCV for hand tracking through Google's `mediapipe` library and the `mido` library for MIDI signal generation.
+This script uses live footage from a webcam to track the a hand and converts the positions into MIDI control signals (MIDI CC).
 
-See here for the result: https://youtu.be/Xb88uwkwUaE
+It's made in Python and uses OpenCV for hand tracking through Google's `mediapipe` library.  The `mido` library is used for MIDI signal generation.
 
-## Getting it working
+To connect to software, a virtual MIDI port is necessary (e.g., LoopMIDI).
+
+### **Figure 1:** Example Use (from [video](https://youtu.be/Xb88uwkwUaE))
+
+![FL example](1_FL.png)
+
+## Requirements
+
+- [Python 3.12](https://www.python.org/downloads/release/python-3120/)
+
+- [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html) virtual MIDI cable by Tobias Erichsen
+
+- MIDI capable software (FL Studio, [Vital](https://vital.audio/), etc.)
+
+## How to Use
 
 1) be sure a camera is attached to the computer (no manual assignment was necessary for me)
 
@@ -16,29 +30,13 @@ See here for the result: https://youtu.be/Xb88uwkwUaE
 
 4) run the script with `python hand_track_to_midi.py` and, after a few seconds, the video feed window should open automatically
 
-5) put a hand into frame and confirm that tracking is working (you will know...see Figure 1 below)
+5) put a hand into frame and confirm the tracking overlay appears (see images above)
 
 6) find and enable the MIDI port you created from your audio software of choice (FL Studio was used in the video)
 
 7) connect the MIDI CC from the script (channel 1, CC 1-6) to your desired parameters (e.g., filter cutoff, wet/dry mix, etc.)
 
 8) press 'q' to quit the program (exiting the window will not stop the script)
-
-### Figure 1: Hand Tracking Example
-
-![hand track example image](1_handtrack.png)
-
-### Figure 2: MIDI CC Example Use (from [video](https://youtu.be/Xb88uwkwUaE))
-
-![FL example](2_FL.png)
-
-## Requirements
-
-- [Python 3.12](https://www.python.org/downloads/release/python-3120/)
-
-- [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html) virtual MIDI cable by Tobias Erichsen
-
-- MIDI capable software (FL Studio, [Vital](https://vital.audio/), etc.)
 
 ## Tips and Pitfalls
 
@@ -48,18 +46,29 @@ The system is free and relatively easy to create and use, but here are a few dif
 
 - **LoopMIDI Port Naming Bug:** You will have to name your port in loopMIDI and use that same name in the code.  HOWEVER, for me, the port was created slightly different from how I typed it ("PythonMIDI 3" instead of "PythonMIDI").  I included a print statement to show the available ports, so be sure to check the terminal if the script fails before video capture initiates
 
-- **Linking Tip:** I found it easiest use the `Multilink to Controllers` button in FL studio (or using hotkey `ctrl + j`) and tweaking a parameter's dial/fader while my hand was on-screen.  Of course, several signals are being sent at once, so just be sure to manually change the CC number at the top of the MIDI Learn pop-up prompt to the desired finger.
+- **Linking Tip:** I found it easiest use the `Multilink to Controllers` button (hotkey `ctrl + j`) in FL studio and tweaking a parameter's dial/fader while my hand was on-screen to initiate the link.  FL will detect the port and channel for the active input, and so only the CC number at the top of the 'Remote control settings' pop-up (Figure 2A, "Ctrl") will need adjusted to the desired finger based on the script.  Default positions are as follows:
 
-- **Smoothing Tip:** I found unsmoothed data to be acceptable in some contexts, but never preferable.  The script can be modified to include smoothing, but FL has a native smoothing function (found in the aforementioned pop-up prompt) with a customizable time window that I found to be sufficient at around 15 ms.  Even with this additional delay, the latency to be noticeable, but far from prohibitive for CC control (Though I would not recommend this for playing notes)
+1) **wrist** - vertical position (raised hand = higher value)
+2) **index** - flexion (flexed finger = higher value)
+3) **middle** - flexion (same)
+4) **ring** - flexion (same)
+5) **pinky** - flexion (same)
+6) **thumb** - flexion (same)
 
-- **Mapping Tip:** the CC value maps can be tailored to the desired sensitivity and range of the parameter you are controlling (e.g., a filter cutoff may sound good only across 70-100 but you may want delicate control and thus a to control movement across those values with a large, deliberate motion).  However, I found that the input mapping field (in the same prompt as mentioned above) allowed for a more intuitive and immediate mapping of the CC values to the desired parameter.  I frequently used something like `Input + 0.5`, which is automatically clamped to valid CC values (represented in the window as 0-1) and represented with a plot that updates when you press `enter`
+### **Figure 2:** Remote Control Settings
 
-## Future Work
+![Remote Control Settings](2_RemoteControlSettings.png)
 
-I don't anticipate building on this much.  It's basically mediapipe and mido working as they were intended out of the box, not terribly creative on my part.  There are some potential improvements that have occurred to me, though.
+- **Mapping Tip:** the CC value maps can be tailored to the desired sensitivity and range of the parameter you are controlling (e.g., maybe a filter sweep sounds desireable only across a small fraction of the possible CC values and so the small range of motion of a finger's bend would present a frustratingly narrow range of desireable change).  The mapping can be altered in the script relatively easily, but I found that FL's `Mapping formula` field (Figure 2B) allowed for an intuitive and responsive testing ground for appropriate CC values on each parameter.  There are many presets with example operations available in the drop-down, but I often used something simple like `Input + 0.5`, leveraging the automatic function clamping as represented by the adjacent plot (which updates when you press `enter`).  This `Input + 0.5` example would be useful if, for instance, I wanted the parameter to remain unactivated (at 0) unless the finger was very flexed and I also didn't want the parameter to ever reach beyond half of its range.
 
-One space with ample room for improvement in the way gestures are recognized. "Finger closedness" is calculated based on fingertip-to-wrist distance which is both vulnerable to the hand's forward angle with the camera and requires mapping to bridge the lingering gap for a fully folded finger.  A different node association could be used, but that would still not be robust to angling (though I imagine in some hands, wrist angle may feel natural as another dimension of control)
+- **Smoothing Tip:** I found unsmoothed data to be acceptable in some contexts, but never preferable.  The script can be modified to include smoothing, but FL has a native smoothing function (Figure 2C) with a customizable time window that I found to be sufficient at around 15 ms (monitor the value in the `hint panel` at the top-left of the FL window while moving the slider).  Even with this additional delay, I felt the latency was noticeable, but far from prohibitive for CC control.
 
-Recognizable gestures (e.g., peace, rock on, ok) and speed-based control (e.g., wrist flick) are also within reason.  Though I couldn't be bothered to investigate, I imagine mediapipe or another library has a gesture recognition model that could be employed rather than working from scratch.
+## Future Directions
 
-Finally, the MIDI output could be expanded to include note-on and note-off messages.  Certainly any percussive or transient-heavy triggered audio would suffer from the latency of this method, but I can imagine something like using one hand for effects as shown so far while the other triggers notes which go through FL's Patcher and Key Mapper to generate multi-instrument chords, arpeggios, bass, etc. (as demonstrated [here](https://youtu.be/1eidT2TAIt8) for my FRK AutoChords Patcher preset)
+I don't anticipate building on this much.  It's basically mediapipe and mido working as they were intended out of the box... not terribly creative on my part.  There are some potential improvements that have occurred to me, though.
+
+One space with ample room for improvement is the way gestures are recognized. "Finger closedness" is calculated based on fingertip-to-wrist distance which is both (1) vulnerable to the hand's forward angle with the camera and (2) requires mapping to bridge the remaining gap for even a fully folded finger.  A different node association could be used, but that would still not be robust to angling (though perhaps the wrist angle could be feel natural as another dimension of control)
+
+Recognizable gestures (e.g., peace, rock on, ok) and speed-based control (e.g., wrist flick) are also within reason.  Though I couldn't be bothered to investigate, I imagine mediapipe or another library has a gesture recognition model that could be employed rather than working from scratch.  Similarly, if a whole-body model is as robust as the hand model, I imagine that could present some interesting (if exhausting) possibilities.
+
+Finally, the MIDI output could be expanded to include note-on/off messages.  Certainly any percussive or otherwise transient-heavy triggered audio would suffer from the latency of this method, but I can imagine perhaps a slow-attack pad feeling satisfying.  Alternatively, a simple trigger can be made to trigger a more complex orchestration of sounds and effects using FL's `Patcher` and `Key Mapper` plugins to generate multi-instrument chords, arpeggios, bass, etc. (as demonstrated [here](https://youtu.be/1eidT2TAIt8) for my FRK AutoChords Patcher preset).  Though not shown in the video, I can imagine using FL's quantization to force the imprecise timing on the the grid for a more polished sound for recording or live performance.
