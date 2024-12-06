@@ -36,7 +36,7 @@ Note that, while I use a paid version of FL Studio, it is the only software that
 
 7) connect the MIDI CC from the script (channel 1, CC 1-6) to your desired parameters (e.g., filter cutoff, wet/dry mix, etc.)
 
-8) press 'q' to quit the program (exiting the window will not stop the script)
+8) press 'q' to quit the program (closing the window will not stop the script)
 
 ## Tips and Pitfalls
 
@@ -48,7 +48,7 @@ The system is free and relatively easy to create and use, but here are a few dif
 
 - **Linking Tip:** I found it easiest use the `Multilink to Controllers` button (hotkey `ctrl + j`) in FL studio and tweaking a parameter's dial/fader while my hand was on-screen to initiate the link.  FL will detect the port and channel for the active input, and so only the CC number at the top of the 'Remote control settings' pop-up (Figure 2A, "Ctrl") will need adjusted to the desired finger based on the script.  Default control values are as follows:
 
-```
+``` py
 (1) wrist - vertical position (raised hand = higher value)
 (2) index - flexion (flexed finger = higher value)
 (3) middle - flexion (same)
