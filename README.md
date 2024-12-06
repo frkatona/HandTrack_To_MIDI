@@ -46,20 +46,22 @@ The system is free and relatively easy to create and use, but here are a few dif
 
 - **LoopMIDI Port Naming Bug:** You will have to name your port in loopMIDI and use that same name in the code.  HOWEVER, for me, the port was created slightly different from how I typed it ("PythonMIDI 3" instead of "PythonMIDI").  I included a print statement to show the available ports, so be sure to check the terminal if the script fails before video capture initiates
 
-- **Linking Tip:** I found it easiest use the `Multilink to Controllers` button (hotkey `ctrl + j`) in FL studio and tweaking a parameter's dial/fader while my hand was on-screen to initiate the link.  FL will detect the port and channel for the active input, and so only the CC number at the top of the 'Remote control settings' pop-up (Figure 2A, "Ctrl") will need adjusted to the desired finger based on the script.  Default positions are as follows:
+- **Linking Tip:** I found it easiest use the `Multilink to Controllers` button (hotkey `ctrl + j`) in FL studio and tweaking a parameter's dial/fader while my hand was on-screen to initiate the link.  FL will detect the port and channel for the active input, and so only the CC number at the top of the 'Remote control settings' pop-up (Figure 2A, "Ctrl") will need adjusted to the desired finger based on the script.  Default control values are as follows:
 
-  1) **wrist** - vertical position (raised hand = higher value)
-  2) **index** - flexion (flexed finger = higher value)
-  3) **middle** - flexion (same)
-  4) **ring** - flexion (same)
-  5) **pinky** - flexion (same)
-  6) **thumb** - flexion (same)
+```
+(1) wrist - vertical position (raised hand = higher value)
+(2) index - flexion (flexed finger = higher value)
+(3) middle - flexion (same)
+(4) ring - flexion (same)
+(5) pinky - flexion (same)
+(6) thumb - flexion (same)
+```
 
 ### **Figure 2:** Remote Control Settings
 
 ![Remote Control Settings](2_RemoteControlSettings.png)
 
-- **Mapping Tip:** the CC value maps can be tailored to the desired sensitivity and range of the parameter you are controlling (e.g., maybe a filter sweep sounds desireable only across a small fraction of the possible CC values and so the small range of motion of a finger's bend would present a frustratingly narrow range of desireable change).  The mapping can be altered in the script relatively easily, but I found that FL's `Mapping formula` field (Figure 2B) allowed for an intuitive and responsive testing ground for appropriate CC values on each parameter.  There are many presets with example operations available in the drop-down, but I often used something simple like `Input + 0.5`, leveraging the automatic function clamping as represented by the adjacent plot (which updates when you press `enter`).  This `Input + 0.5` example would be useful if, for instance, I wanted the parameter to remain unactivated (at 0) unless the finger was very flexed and I also didn't want the parameter to ever reach beyond half of its range.
+- **Mapping Tip:** the CC value maps can be tailored to the desired sensitivity and range of the parameter you are controlling (e.g., maybe a filter sweep sounds desireable only across a small fraction of the possible CC values and so the small range of motion of a finger's bend would present a frustratingly narrow range of desireable change).  The mapping can be altered in the script relatively easily, but I found that FL's `Mapping formula` field (Figure 2B) allowed for an intuitive and responsive testing ground for appropriate CC values on each parameter.  There are many presets with example operations available in the drop-down, but I often used something simple like `Input - 0.5`, leveraging the automatic function clamping as represented by the adjacent plot (which updates when you press `enter`).  This `Input - 0.5` example would be useful if, for instance, I wanted the parameter to remain unactivated (at 0) unless the finger was very flexed and I also didn't want the parameter to ever reach beyond half of its range.
 
 - **Smoothing Tip:** I found unsmoothed data to be acceptable in some contexts, but never preferable.  The script can be modified to include smoothing, but FL has a native smoothing function (Figure 2C) with a customizable time window that I found to be sufficient at around 15 ms (monitor the value in the `hint panel` at the top-left of the FL window while moving the slider).  Even with this additional delay, I felt the latency was noticeable, but far from prohibitive for CC control.
 
