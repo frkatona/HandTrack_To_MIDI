@@ -48,12 +48,12 @@ The system is free and relatively easy to create and use, but here are a few dif
 
 - **Linking Tip:** I found it easiest use the `Multilink to Controllers` button (hotkey `ctrl + j`) in FL studio and tweaking a parameter's dial/fader while my hand was on-screen to initiate the link.  FL will detect the port and channel for the active input, and so only the CC number at the top of the 'Remote control settings' pop-up (Figure 2A, "Ctrl") will need adjusted to the desired finger based on the script.  Default positions are as follows:
 
-1) **wrist** - vertical position (raised hand = higher value)
-2) **index** - flexion (flexed finger = higher value)
-3) **middle** - flexion (same)
-4) **ring** - flexion (same)
-5) **pinky** - flexion (same)
-6) **thumb** - flexion (same)
+  1) **wrist** - vertical position (raised hand = higher value)
+  2) **index** - flexion (flexed finger = higher value)
+  3) **middle** - flexion (same)
+  4) **ring** - flexion (same)
+  5) **pinky** - flexion (same)
+  6) **thumb** - flexion (same)
 
 ### **Figure 2:** Remote Control Settings
 
