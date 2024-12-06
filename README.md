@@ -14,7 +14,7 @@ Note that, while I use a paid version of FL Studio, it is the only software that
 
 - [Python 3.12](https://www.python.org/downloads/release/python-3120/)
 
-- [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html) virtual MIDI cable by Tobias Erichsen
+- [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html) - virtual MIDI cable by Tobias Erichsen
 
 - MIDI capable software (FL Studio, [Vital](https://vital.audio/), etc.)
 
@@ -22,7 +22,7 @@ Note that, while I use a paid version of FL Studio, it is the only software that
 
 1) be sure a camera is attached to the computer (no manual assignment was necessary for me)
 
-2) download loopMIDI and create a virtual port (I named mine "PythonMIDI")
+2) open loopMIDI and create a virtual port (I named mine "PythonMIDI")
 
 3) open the script with a text editor and add the name of the port from step 2 to the code as seen here:
 
@@ -30,7 +30,7 @@ Note that, while I use a paid version of FL Studio, it is the only software that
 
 4) run the script (e.g., through a terminal like powershell by changing the active directory to the folder with the script and executing the text `python hand_track_to_midi.py`) and, after a few seconds, the video feed window should open automatically
 
-5) put a hand into frame and confirm the tracking overlay appears (see images above)
+5) put a hand into frame and confirm the tracking overlay appears (see Figure 1)
 
 6) find and enable the MIDI port you created from your audio software of choice (FL Studio was used in the video)
 
@@ -42,7 +42,7 @@ Note that, while I use a paid version of FL Studio, it is the only software that
 
 The system is free and relatively easy to create and use, but here are a few difficulties that may arise:
 
-- **Python Version Pitfall:** Mediapipe would not even install for me with Python 3.13 (current version as of writing).  I recommend a virtual environment with 3.12 if your installation fails
+- **Python Version Pitfall:** mediapipe would not even install for me with Python 3.13 (current version as of writing).  I recommend a virtual environment with 3.12 if your installation fails
 
 - **LoopMIDI Port Naming Bug:** You will have to name your port in loopMIDI and use that same name in the code.  HOWEVER, for me, the port was created slightly different from how I typed it ("PythonMIDI 3" instead of "PythonMIDI").  I included a print statement to show the available ports, so be sure to check the terminal if the script fails before video capture initiates
 
