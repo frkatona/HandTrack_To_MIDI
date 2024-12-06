@@ -20,23 +20,37 @@ Note that, while I use a paid version of FL Studio, it is the only software that
 
 ## How to Use
 
-1) be sure a camera is attached to the computer (no manual assignment was necessary for me)
+**1) be sure a camera is attached to the computer**
 
-2) open loopMIDI and create a virtual port (I named mine "PythonMIDI")
+   - no manual COM assignment or anything like that was necessary for my inexpensive 'Logi' USB webcam
 
-3) open the script with a text editor and add the name of the port from step 2 to the code as seen here:
+**2) open loopMIDI and create a virtual Port**
 
-   `midi_out = mido.open_output('PythonMIDI')`
+   -  type your desired name to the `New port-name` text field at the bottom and push the `+` button (I named mine "PythonMIDI")
 
-4) run the script (e.g., through a terminal like powershell by changing the active directory to the folder with the script and executing the text `python hand_track_to_midi.py`) and, after a few seconds, the video feed window should open automatically
+**3) open the script with a text editor and add the name of the port from step 2 to the code**
 
-5) put a hand into frame and confirm the tracking overlay appears (see Figure 1)
+   -  e.g., `midi_out = mido.open_output('PythonMIDI')`
 
-6) find and enable the MIDI port you created from your audio software of choice (FL Studio was used in the video)
+**4) run the script**
 
-7) connect the MIDI CC from the script (channel 1, CC 1-6) to your desired parameters (e.g., filter cutoff, wet/dry mix, etc.)
+   - e.g., by opening the containing folder in a terminal (e.g., powershell) and executing the text `python hand_track_to_midi.py`
 
-8) press 'q' to quit the program (closing the window will not stop the script)
+   - after a few seconds, the video feed window should open automatically
+
+   - confirm the tracking overlay appears when putting a hand in-frame, as seen in Figure 1
+
+**5) enable the MIDI port in your DAW**
+
+   - in FL Studio, this is done by going to `Options` -> `MIDI settings` and enabling the port in the `Input` section
+
+**6) link CC to desired parameters**
+
+   -  see the Tips section below for recommendations on linking in FL
+
+**7) press 'q' to quit the program**
+
+   - closing the window will not stop the script
 
 ## Tips and Pitfalls
 
@@ -75,6 +89,6 @@ I don't anticipate building on this much.  It's basically mediapipe and mido wor
 
 - **Recognizable gestures** (e.g., peace, rock on) and **speed-based control** (e.g., wrist flick) are also within reason.  Though I couldn't be bothered to investigate, I imagine mediapipe or another library has a gesture recognition model that could be employed rather than working from scratch.  Similarly, if a whole-body model is as robust as the hand model, I imagine that could present some interesting (if exhausting) possibilities
 
-- The MIDI signals can also be sent from the computer to trigger lighting on a MIDI controller with LED pads (e.g., Novation Launchkey 49).  This could easily extend to a proper DMX-controlled lighting system with a DMX-to-MIDI interface.
+- **IRL Lighting Control** can easily [citation needed] be controlled through MIDI-out (i.e., sending MIDI from your computer to a connected device).  Perhaps the simplest case it triggering lighting on a MIDI controller with controllable LED pads like the Novation Launchkey 49 (e.g., MaddyGuthridge's [universal controller script](https://github.com/MaddyGuthridge/Universal-Controller-Script)).  With a MIDI-to-DMX interface (e.g., Entecc's [Open DMX USB interface](https://www.enttec.com/product/dmx-usb-interfaces/open-dmx-usb/)), this could scale into a complex, professional lighting setup.  I can envision clapping for blackouts, finger pointing a spotlight movement in the corresponding direction, and a wrist flick for strobe effects color, intensity, and speed controlled with horizontal resting position. The possibilities are endless, though obviously the cost of the hardware and the time spent implementing and troubleshooting are not.
 
-- Finally, the MIDI output could be expanded to send additonal, like note-on/off messages.  Certainly any percussive or otherwise transient-heavy triggered audio would suffer from the latency of this method, but I can imagine perhaps a slow-attack pad feeling satisfying.  Alternatively, a simple trigger can be made to trigger a more complex orchestration of sounds and effects using FL's `Patcher` and `Key Mapper` plugins to generate multi-instrument chords, arpeggios, bass, etc. (as demonstrated [here](https://youtu.be/1eidT2TAIt8) for my FRK AutoChords Patcher preset).  Though not shown in the video, I can imagine using FL's quantization to force the imprecise timing on the the grid for a more polished sound for recording or live performance.  Speaking of which, FL's native 'Performance Mode' fit the bill nicely, perhaps using the CC values in 'latch trigger' mode, switching binary state beyond a certain threshold with some kind of 'de-bounce' logic.
+- **Sending non-control data** like note-on/off messages.  Certainly any percussive or otherwise transient-heavy triggered audio would suffer from the latency of this method, but I can imagine perhaps a slow-attack pad feeling satisfying.  Alternatively, a simple trigger can be made to trigger a more complex orchestration of sounds and effects using FL's `Patcher` and `Key Mapper` plugins to generate multi-instrument chords, arpeggios, bass, etc. (as demonstrated [here](https://youtu.be/1eidT2TAIt8) for my FRK AutoChords Patcher preset).  Though not shown in the video, I can imagine using FL's quantization to force the imprecise timing on the the grid for a more polished sound for recording or live performance.  Speaking of which, FL's native 'Performance Mode' fit the bill nicely, perhaps using the CC values in 'latch trigger' mode, switching binary state beyond a certain threshold with some kind of 'de-bounce' logic.
