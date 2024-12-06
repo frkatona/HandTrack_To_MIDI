@@ -1,14 +1,14 @@
 # Hand Track to MIDI CC
 
-This script uses live footage from a webcam to track the a hand and converts the positions into MIDI control signals (MIDI CC).
+This script uses live footage from a webcam to track the user's hand and converts the solved node positions into MIDI control signals (MIDI CC) for the purposes of creating and influencing audio effects.
 
-It's made in Python and uses OpenCV for hand tracking through Google's `mediapipe` library.  The `mido` library is used for MIDI signal generation.  Connecting to software requires a virtual MIDI port is necessary like LoopMIDI.
+It's made in Python and uses OpenCV for hand tracking through Google's `mediapipe` library.  The `mido` library is used for MIDI signal generation.  Connect to your preferred audio software using a virtual MIDI cable (e.g., LoopMIDI).
 
 ### **Figure 1:** Example Use (see the full [demonstration video](https://youtu.be/Xb88uwkwUaE))
 
 ![FL example](1_FL.png)
 
-Note that, while I use a paid version of FL Studio, it is the only software that appears in the video which is not free.  And even then, the free version of FL Studio is (to the best of my knowledge) useable with this script.  Either way,  Vital was the primary sound source in the video and is available to use with the creation of a free account.
+Note that, while I use a paid version of FL Studio, it is the only software that appears in the video which is not free.  And even then, the free version of FL Studio is (to the best of my knowledge) useable with this script.  Either way,  Vital was the primary sound source and is available to use with the creation of a free account.
 
 ## Requirements
 
