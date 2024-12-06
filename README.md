@@ -28,7 +28,7 @@ Note that, while I use a paid version of FL Studio, it is the only software that
 
    `midi_out = mido.open_output('PythonMIDI')`
 
-4) run the script with `python hand_track_to_midi.py` and, after a few seconds, the video feed window should open automatically
+4) run the script (e.g., through a terminal like powershell by changing the active directory to the folder with the script and executing the text `python hand_track_to_midi.py`) and, after a few seconds, the video feed window should open automatically
 
 5) put a hand into frame and confirm the tracking overlay appears (see images above)
 
