@@ -10,15 +10,15 @@ See here for the result: https://youtu.be/Xb88uwkwUaE
 
 2) download loopMIDI and create a virtual port (I named mine "PythonMIDI")
 
-3) add the name of the port to the code as seen here:
+3) open the script with a text editor and add the name of the port from step 2 to the code as seen here:
 
    `midi_out = mido.open_output('PythonMIDI')`
 
-4) run the script (it took 5-10 seconds for a live video feed window to appear for me)
+4) run the script with `python hand_track_to_midi.py` and, after a few seconds, the video feed window should open automatically
 
-5) put a hand into frame and confirm that tracking is working (you will know if it is working, see Figure 1 below)
+5) put a hand into frame and confirm that tracking is working (you will know...see Figure 1 below)
 
-6) find and enable the MIDI port you created from your audio software of choice (FL Studio was used in the video) 
+6) find and enable the MIDI port you created from your audio software of choice (FL Studio was used in the video)
 
 7) connect the MIDI CC from the script (channel 1, CC 1-6) to your desired parameters (e.g., filter cutoff, wet/dry mix, etc.)
 
