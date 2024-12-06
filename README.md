@@ -2,13 +2,13 @@
 
 This script uses live footage from a webcam to track the a hand and converts the positions into MIDI control signals (MIDI CC).
 
-It's made in Python and uses OpenCV for hand tracking through Google's `mediapipe` library.  The `mido` library is used for MIDI signal generation.
-
-To connect to software, a virtual MIDI port is necessary (e.g., LoopMIDI).
+It's made in Python and uses OpenCV for hand tracking through Google's `mediapipe` library.  The `mido` library is used for MIDI signal generation.  Connecting to software requires a virtual MIDI port is necessary like LoopMIDI.
 
 ### **Figure 1:** Example Use (see the full [demonstration video](https://youtu.be/Xb88uwkwUaE))
 
 ![FL example](1_FL.png)
+
+Note that, while I use a paid version of FL Studio, it is the only software that appears in the video which is not free.  And even then, the free version of FL Studio is (to the best of my knowledge) useable with this script.  Either way,  Vital was the primary sound source in the video and is available to use with the creation of a free account.
 
 ## Requirements
 
@@ -73,7 +73,7 @@ I don't anticipate building on this much.  It's basically mediapipe and mido wor
 
 One space with ample room for improvement is the way gestures are recognized. "Finger closedness" is calculated based on fingertip-to-wrist distance which is both (1) vulnerable to the hand's forward angle with the camera and (2) requires mapping to bridge the remaining gap for even a fully folded finger.  A different node association could be used, but that would still not be robust to angling (though perhaps the wrist angle could be feel natural as another dimension of control)
 
-Recognizable gestures (e.g., peace, rock on, ok) and speed-based control (e.g., wrist flick) are also within reason.  Though I couldn't be bothered to investigate, I imagine mediapipe or another library has a gesture recognition model that could be employed rather than working from scratch.  Similarly, if a whole-body model is as robust as the hand model, I imagine that could present some interesting (if exhausting) possibilities
+Recognizable gestures (e.g., peace, rock on) and speed-based control (e.g., wrist flick) are also within reason.  Though I couldn't be bothered to investigate, I imagine mediapipe or another library has a gesture recognition model that could be employed rather than working from scratch.  Similarly, if a whole-body model is as robust as the hand model, I imagine that could present some interesting (if exhausting) possibilities
 
 The MIDI signals can also be sent from the computer to trigger lighting on a MIDI controller with LED pads (e.g., Novation Launchkey 49).  This could easily extend to a proper DMX-controlled lighting system with a DMX-to-MIDI interface.
 
