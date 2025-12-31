@@ -3,18 +3,23 @@ import mediapipe as mp
 import numpy as np
 import mido
 from mido import Message
+import argparse
+
+# Parse arguments
+parser = argparse.ArgumentParser(description='Hand Tracking to MIDI CC.')
+parser.add_argument('--port', type=str, default='PythonMIDI 1', help='MIDI output port name')
+args = parser.parse_args()
 
 # init track/draw module
 mp_hands = mp.solutions.hands
 mp_drawing = mp.solutions.drawing_utils
 
-print("Available MIDI output ports:")
-print(mido.get_output_names())
-
 try:
-    midi_out = mido.open_output('PythonMIDI 1')
+    midi_out = mido.open_output(args.port)
+    print(f"Opened MIDI output port: {args.port}")
 except IOError:
-    print("MIDI output port 'PythonMIDI' not found. Please check the port name.")
+    print(f"MIDI output port '{args.port}' not found.")
+    print("Available ports:", mido.get_output_names())
     exit()
 
 # init webcam feed

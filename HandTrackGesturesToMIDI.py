@@ -4,6 +4,12 @@ import numpy as np
 import mido
 from mido import Message
 import time
+import argparse
+
+# Parse arguments
+parser = argparse.ArgumentParser(description='Hand Gesture to MIDI CC.')
+parser.add_argument('--port', type=str, default='PythonMIDI 1', help='MIDI output port name')
+args = parser.parse_args()
 
 # MediaPipe Task imports
 BaseOptions = mp.tasks.BaseOptions
@@ -11,15 +17,13 @@ GestureRecognizer = mp.tasks.vision.GestureRecognizer
 GestureRecognizerOptions = mp.tasks.vision.GestureRecognizerOptions
 VisionRunningMode = mp.tasks.vision.RunningMode
 
-# Initialize MIDI
-print("Available MIDI output ports:")
-print(mido.get_output_names())
-
 try:
-    # Using 'PythonMIDI 1' as discovered in previous step
-    midi_out = mido.open_output('PythonMIDI 1')
+    # Using 'PythonMIDI 1' as default
+    midi_out = mido.open_output(args.port)
+    print(f"Opened MIDI output port: {args.port}")
 except IOError:
-    print("MIDI output port 'PythonMIDI 1' not found. Please check the port name.")
+    print(f"MIDI output port '{args.port}' not found.")
+    print("Available ports:", mido.get_output_names())
     exit()
 
 # Gesture to CC mapping
@@ -39,7 +43,7 @@ last_cc_sent = {cc: 0 for cc in GESTURE_CC_MAP.values()}
 cc_values[1] = 0.0 # For palm height
 last_cc_sent[1] = 0
 
-DECAY_RATE = 127.0 / 2.0  # Units per second (127 over 2 seconds)
+DECAY_RATE = 127.0 / 1.0  # Units per second (127 over 2 seconds)
 last_time = time.time()
 
 # Setup Gesture Recognizer

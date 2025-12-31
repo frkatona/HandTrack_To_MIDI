@@ -10,47 +10,66 @@ It's made in Python and uses OpenCV for hand tracking through Google's `mediapip
 
 Note that, while I use a paid version of FL Studio, it is the only software that appears in the video which is not free.  And even then, the free version of FL Studio is (to the best of my knowledge) useable with this script.  Either way,  Vital was the primary sound source and is available to use with the creation of a free account.
 
-## Requirements
+## Quick Start
 
-- [Python 3.12](https://www.python.org/downloads/release/python-3120/)
+### 1. Prerequisites
+- **Python 3.9 - 3.12** (MediaPipe does not yet support 3.13)
+- **Virtual MIDI Cable**: [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html) (Windows) or IAC Driver (macOS)
+- **Webcam**
 
-- [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html) - virtual MIDI cable by Tobias Erichsen
+### 2. Installation
+```bash
+# Clone the repo
+git clone https://github.com/frkatona/HandTrack_To_MIDI.git
+cd HandTrack_To_MIDI
 
-- MIDI capable software (FL Studio, [Vital](https://vital.audio/), etc.)
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # Windows: venv\\Scripts\\activate
 
-## How to Use
+# Install dependencies
+pip install -r requirements.txt
 
-**1) be sure a camera is attached to the computer**
+# Download gesture model (required for gesture script)
+python download_model.py
+```
 
-   - no manual COM assignment or anything like that was necessary for my inexpensive 'Logi' USB webcam
+### 3. Usage
 
-**2) open loopMIDI and create a virtual Port**
+#### Option A: Continuous Tracking (Original)
+Maps wrist height (CC 1) and finger flexion (CC 2-6) to MIDI.
+```bash
+python HandTrackToMIDI.py --port "Your MIDI Port Name"
+```
 
-   -  type your desired name to the `New port-name` text field at the bottom and push the `+` button (I named mine "PythonMIDI")
+#### Option B: Gesture-Based (New)
+Maps discrete gestures (Fist, Victory, etc.) to CC 2-8 with a 2-second decay.
+```bash
+python HandTrackGesturesToMIDI.py --port "Your MIDI Port Name"
+```
 
-**3) open the script with a text editor and add the name of the port from step 2 to the code**
+#### Option C: Using Docker (Most Predictable)
+If you have [Docker](https://www.docker.com/products/docker-desktop/) installed, you can run the app without installing Python or any libraries on your computer locally.
 
-   -  e.g., `midi_out = mido.open_output('PythonMIDI')`
+**1. Build the image (Do this once):**
+```bash
+docker build -t hand-track-midi .
+```
 
-**4) run the script**
+**2. Run the container:**
+```bash
+# On Linux:
+docker run -it --rm --device /dev/video0 -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix hand-track-midi
 
-   - e.g., by opening the containing folder in a terminal (e.g., powershell) and executing the text `python hand_track_to_midi.py`
+# On Windows/macOS:
+# Hardware passthrough (webcam/MIDI) is more complex in Docker on Windows. 
+# It is recommended to use the "Installation" steps above for the best experience.
+```
 
-   - after a few seconds, the video feed window should open automatically
+> [!TIP]
+> **Why use Docker?** It ensures that "it works on my machine" works on *every* machine by packaging all the dependencies (like the specific versions of MediaPipe and OpenCV) into a single container.
 
-   - confirm the tracking overlay appears when putting a hand in-frame, as seen in Figure 1
-
-**5) enable the MIDI port in your DAW**
-
-   - in FL Studio, this is done by going to `Options` -> `MIDI settings` and enabling the port in the `Input` section
-
-**6) link CC to desired parameters**
-
-   -  see the Tips section below for recommendations on linking in FL
-
-**7) press 'q' to quit the program**
-
-   - closing the window will not stop the script
+*Note: Use `python HandTrackToMIDI.py --help` to see all available ports if you aren't sure of the name.*
 
 ## Tips and Pitfalls
 
