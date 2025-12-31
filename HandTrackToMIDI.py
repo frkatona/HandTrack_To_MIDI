@@ -71,11 +71,11 @@ with mp_hands.Hands(static_image_mode=False, max_num_hands=1, min_detection_conf
                 thumb_closedness = calculate_closedness(thumb_tip)
 
                 # send midi (channel 1, CC 2 through 6)
-                midi_out.send(Message('control_change', control=2, value=index_closedness))
-                midi_out.send(Message('control_change', control=3, value=middle_closedness))
-                # midi_out.send(Message('control_change', control=4, value=ring_closedness))
-                # midi_out.send(Message('control_change', control=5, value=pinky_closedness))
-                # midi_out.send(Message('control_change', control=6, value=thumb_closedness))
+                midi_out.send(Message('control_change', channel=1, control=2, value=index_closedness))
+                midi_out.send(Message('control_change', channel=1, control=3, value=middle_closedness))
+                midi_out.send(Message('control_change', control=4, value=ring_closedness))
+                midi_out.send(Message('control_change', control=5, value=pinky_closedness))
+                midi_out.send(Message('control_change', control=6, value=thumb_closedness))
 
         # display frame
         cv2.imshow('Hand Tracking', frame)
