@@ -34,21 +34,7 @@ pip install -r requirements.txt
 python download_model.py
 ```
 
-### 3. Usage
-
-#### Option A: Continuous Tracking (Original)
-Maps wrist height (CC 1) and finger flexion (CC 2-6) to MIDI.
-```bash
-python HandTrackToMIDI.py --port "Your MIDI Port Name"
-```
-
-#### Option B: Gesture-Based (New)
-Maps discrete gestures (Fist, Victory, etc.) to CC 2-8 with a 2-second decay.
-```bash
-python HandTrackGesturesToMIDI.py --port "Your MIDI Port Name"
-```
-
-#### Option C: Using Docker (Most Predictable)
+#### OR: Using Docker (Most Predictable)
 If you have [Docker](https://www.docker.com/products/docker-desktop/) installed, you can run the app without installing Python or any libraries on your computer locally.
 
 **1. Build the image (Do this once):**
@@ -66,10 +52,21 @@ docker run -it --rm --device /dev/video0 -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/
 # It is recommended to use the "Installation" steps above for the best experience.
 ```
 
-> [!TIP]
-> **Why use Docker?** It ensures that "it works on my machine" works on *every* machine by packaging all the dependencies (like the specific versions of MediaPipe and OpenCV) into a single container.
+### 3. Usage
 
-*Note: Use `python HandTrackToMIDI.py --help` to see all available ports if you aren't sure of the name.*
+#### Option A: Continuous Tracking (Original)
+Maps wrist height (CC 1) and finger flexion (CC 2-6) to MIDI.
+```bash
+python HandTrackToMIDI.py --port "Your MIDI Port Name"
+```
+
+#### Option B: Gesture-Based (New)
+Maps discrete gestures (Fist, Victory, etc.) to CC 2-8 with a 2-second decay.
+```bash
+python HandTrackGesturesToMIDI.py --port "Your MIDI Port Name"
+```
+
+![AK Hand Gesturing](3_HandGesture.png)
 
 ## Tips and Pitfalls
 
