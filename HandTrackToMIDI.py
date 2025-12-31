@@ -12,7 +12,7 @@ print("Available MIDI output ports:")
 print(mido.get_output_names())
 
 try:
-    midi_out = mido.open_output('PythonMIDI 2')
+    midi_out = mido.open_output('PythonMIDI 1')
 except IOError:
     print("MIDI output port 'PythonMIDI' not found. Please check the port name.")
     exit()
@@ -73,9 +73,9 @@ with mp_hands.Hands(static_image_mode=False, max_num_hands=1, min_detection_conf
                 # send midi (channel 1, CC 2 through 6)
                 midi_out.send(Message('control_change', control=2, value=index_closedness))
                 midi_out.send(Message('control_change', control=3, value=middle_closedness))
-                midi_out.send(Message('control_change', control=4, value=ring_closedness))
-                midi_out.send(Message('control_change', control=5, value=pinky_closedness))
-                midi_out.send(Message('control_change', control=6, value=thumb_closedness))
+                # midi_out.send(Message('control_change', control=4, value=ring_closedness))
+                # midi_out.send(Message('control_change', control=5, value=pinky_closedness))
+                # midi_out.send(Message('control_change', control=6, value=thumb_closedness))
 
         # display frame
         cv2.imshow('Hand Tracking', frame)
