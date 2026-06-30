@@ -1,120 +1,178 @@
+import argparse
+import sys
+import time
+from pathlib import Path
+
 import cv2
 import mediapipe as mp
-import numpy as np
 import mido
 from mido import Message
-import time
-import argparse
 
-# Parse arguments
-parser = argparse.ArgumentParser(description='Hand Gesture to MIDI CC.')
-parser.add_argument('--port', type=str, default='PythonMIDI 1', help='MIDI output port name')
-args = parser.parse_args()
 
-# MediaPipe Task imports
-BaseOptions = mp.tasks.BaseOptions
-GestureRecognizer = mp.tasks.vision.GestureRecognizer
-GestureRecognizerOptions = mp.tasks.vision.GestureRecognizerOptions
-VisionRunningMode = mp.tasks.vision.RunningMode
-
-try:
-    # Using 'PythonMIDI 1' as default
-    midi_out = mido.open_output(args.port)
-    print(f"Opened MIDI output port: {args.port}")
-except IOError:
-    print(f"MIDI output port '{args.port}' not found.")
-    print("Available ports:", mido.get_output_names())
-    exit()
-
-# Gesture to CC mapping
+DEFAULT_MODEL_PATH = Path(__file__).with_name("gesture_recognizer.task")
 GESTURE_CC_MAP = {
-    'Open_Palm': 2,
-    'Closed_Fist': 3,
-    'Pointing_Up': 4,
-    'Victory': 5,
-    'ILoveYou': 6,
-    'Thumb_Up': 7,
-    'Thumb_Down': 8
+    "Open_Palm": 2,
+    "Closed_Fist": 3,
+    "Pointing_Up": 4,
+    "Victory": 5,
+    "ILoveYou": 6,
+    "Thumb_Up": 7,
+    "Thumb_Down": 8,
 }
+DECAY_SECONDS = 2.0
+DECAY_RATE = 127.0 / DECAY_SECONDS
 
-# State for decay logic
-cc_values = {cc: 0.0 for cc in GESTURE_CC_MAP.values()}
-last_cc_sent = {cc: 0 for cc in GESTURE_CC_MAP.values()}
-cc_values[1] = 0.0 # For palm height
-last_cc_sent[1] = 0
 
-DECAY_RATE = 127.0 / 1.0  # Units per second (127 over 2 seconds)
-last_time = time.time()
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Hand gesture recognition to MIDI CC.")
+    parser.add_argument("--port", default="PythonMIDI 1", help="MIDI output port name")
+    parser.add_argument(
+        "--channel",
+        type=int,
+        choices=range(1, 17),
+        default=1,
+        metavar="1-16",
+        help="MIDI channel (default: 1)",
+    )
+    parser.add_argument("--camera", type=int, default=0, help="Camera device index")
+    parser.add_argument(
+        "--model",
+        type=Path,
+        default=DEFAULT_MODEL_PATH,
+        help="Path to the MediaPipe gesture recognizer model",
+    )
+    return parser.parse_args()
 
-# Setup Gesture Recognizer
-options = GestureRecognizerOptions(
-    base_options=BaseOptions(model_asset_path='gesture_recognizer.task'),
-    running_mode=VisionRunningMode.VIDEO
-)
 
-# Initialize webcam
-cap = cv2.VideoCapture(0)
+def map_palm_height(y_coordinate: float) -> int:
+    normalized = max(0.0, min(1.0, y_coordinate))
+    return round((1.0 - normalized) * 127)
 
-with GestureRecognizer.create_from_options(options) as recognizer:
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            break
 
-        frame = cv2.flip(frame, 1)
-        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_frame)
+def open_midi_output(port_name: str):
+    try:
+        midi_out = mido.open_output(port_name)
+    except (OSError, RuntimeError) as error:
+        try:
+            available = mido.get_output_names()
+        except (OSError, RuntimeError):
+            available = []
+        ports = ", ".join(available) if available else "none"
+        raise RuntimeError(
+            f"MIDI output port '{port_name}' could not be opened. Available ports: {ports}"
+        ) from error
 
-        # Process frame
-        timestamp_ms = int(time.time() * 1000)
-        result = recognizer.recognize_for_video(mp_image, timestamp_ms)
+    print(f"Opened MIDI output port: {port_name}")
+    return midi_out
 
-        current_time = time.time()
-        dt = current_time - last_time
-        last_time = current_time
 
-        # Update decay for all gesture CCs
-        current_gestures = []
-        if result.gestures:
-            # We assume one hand for simplicity, matching original script
-            for hand_gestures in result.gestures:
-                if hand_gestures:
-                    top_gesture = hand_gestures[0].category_name
-                    current_gestures.append(top_gesture)
+def run(args: argparse.Namespace) -> int:
+    model_path = args.model.expanduser().resolve()
+    if not model_path.is_file():
+        print(f"Model file not found: {model_path}", file=sys.stderr)
+        return 1
 
-        # Update CC values based on detection and decay
-        for gesture, cc in GESTURE_CC_MAP.items():
-            if gesture in current_gestures:
-                cc_values[cc] = 127.0
-            else:
-                cc_values[cc] = max(0.0, cc_values[cc] - (DECAY_RATE * dt))
+    try:
+        midi_out = open_midi_output(args.port)
+    except RuntimeError as error:
+        print(error, file=sys.stderr)
+        return 1
 
-        # Handle palm height mapping (CC 1)
-        if result.hand_landmarks:
-            # HandLandmark.WRIST is 0
-            wrist = result.hand_landmarks[0][0]
-            palm_height_cc = int(np.interp(wrist.y, [0.0, 1.0], [127, 0]))
-            cc_values[1] = float(palm_height_cc)
-            
-            # Optional: Draw landmarks
-            # (Skipping full drawing utility to keep it lean, but could be added)
+    camera = cv2.VideoCapture(args.camera)
+    if not camera.isOpened():
+        print(f"Camera {args.camera} could not be opened.", file=sys.stderr)
+        midi_out.close()
+        return 1
 
-        # Send MIDI messages if value changed significantly
-        for cc, val in cc_values.items():
-            int_val = int(round(val))
-            if int_val != last_cc_sent[cc]:
-                midi_out.send(Message('control_change', channel=1, control=cc, value=int_val))
-                last_cc_sent[cc] = int_val
+    options = mp.tasks.vision.GestureRecognizerOptions(
+        base_options=mp.tasks.BaseOptions(model_asset_path=str(model_path)),
+        running_mode=mp.tasks.vision.RunningMode.VIDEO,
+        num_hands=1,
+    )
+    midi_channel = args.channel - 1
+    cc_values = {control: 0.0 for control in (1, *GESTURE_CC_MAP.values())}
+    last_sent = {control: 0 for control in cc_values}
+    previous_time = time.perf_counter()
+    start_time = previous_time
+    last_timestamp_ms = -1
 
-        # UI Overlay
-        cv2.putText(frame, f"Gestures: {', '.join(current_gestures)}", (10, 30), 
-                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-        
-        cv2.imshow('Hand Gesture MIDI', frame)
+    try:
+        with mp.tasks.vision.GestureRecognizer.create_from_options(options) as recognizer:
+            while camera.isOpened():
+                success, frame = camera.read()
+                if not success:
+                    print("Camera stopped returning frames.", file=sys.stderr)
+                    return 1
 
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+                frame = cv2.flip(frame, 1)
+                rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_frame)
+                timestamp_ms = max(
+                    last_timestamp_ms + 1,
+                    int((time.perf_counter() - start_time) * 1000),
+                )
+                last_timestamp_ms = timestamp_ms
+                result = recognizer.recognize_for_video(mp_image, timestamp_ms)
 
-cap.release()
-cv2.destroyAllWindows()
-midi_out.close()
+                current_time = time.perf_counter()
+                elapsed = current_time - previous_time
+                previous_time = current_time
+
+                current_gestures = []
+                for hand_gestures in result.gestures:
+                    if hand_gestures:
+                        current_gestures.append(hand_gestures[0].category_name)
+
+                for gesture, control in GESTURE_CC_MAP.items():
+                    if gesture in current_gestures:
+                        cc_values[control] = 127.0
+                    else:
+                        cc_values[control] = max(
+                            0.0, cc_values[control] - DECAY_RATE * elapsed
+                        )
+
+                if result.hand_landmarks:
+                    cc_values[1] = float(map_palm_height(result.hand_landmarks[0][0].y))
+
+                for control, value in cc_values.items():
+                    rounded_value = round(value)
+                    if rounded_value != last_sent[control]:
+                        midi_out.send(
+                            Message(
+                                "control_change",
+                                channel=midi_channel,
+                                control=control,
+                                value=rounded_value,
+                            )
+                        )
+                        last_sent[control] = rounded_value
+
+                gesture_text = ", ".join(current_gestures) or "None"
+                cv2.putText(
+                    frame,
+                    f"Gestures: {gesture_text}",
+                    (10, 30),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    1,
+                    (0, 255, 0),
+                    2,
+                )
+                cv2.imshow("Hand Gesture MIDI", frame)
+
+                key = cv2.waitKey(1) & 0xFF
+                if key in (ord("q"), 27):
+                    return 0
+    finally:
+        camera.release()
+        cv2.destroyAllWindows()
+        midi_out.close()
+
+    return 0
+
+
+def main() -> int:
+    return run(parse_args())
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

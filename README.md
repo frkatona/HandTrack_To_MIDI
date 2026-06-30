@@ -13,7 +13,7 @@ Note that, while I use a paid version of FL Studio, it is the only software that
 ## Quick Start
 
 ### 1. Prerequisites
-- **Python 3.9 - 3.12** (MediaPipe does not yet support 3.13)
+- **Python 3.9 or newer**
 - **Virtual MIDI Cable**: [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html) (Windows) or IAC Driver (macOS)
 - **Webcam**
 
@@ -25,31 +25,10 @@ cd HandTrack_To_MIDI
 
 # Create virtual environment
 python -m venv venv
-source venv/bin/activate  # Windows: venv\\Scripts\\activate
+source venv/bin/activate  # Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
-
-# Download gesture model (required for gesture script)
-python download_model.py
-```
-
-#### OR: Using Docker (Most Predictable)
-If you have [Docker](https://www.docker.com/products/docker-desktop/) installed, you can run the app without installing Python or any libraries on your computer locally.
-
-**1. Build the image (Do this once):**
-```bash
-docker build -t hand-track-midi .
-```
-
-**2. Run the container:**
-```bash
-# On Linux:
-docker run -it --rm --device /dev/video0 -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix hand-track-midi
-
-# On Windows/macOS:
-# Hardware passthrough (webcam/MIDI) is more complex in Docker on Windows. 
-# It is recommended to use the "Installation" steps above for the best experience.
 ```
 
 ### 3. Usage
@@ -66,13 +45,14 @@ Maps discrete gestures (Fist, Victory, etc.) to CC 2-8 with a 2-second decay.
 python HandTrackGesturesToMIDI.py --port "Your MIDI Port Name"
 ```
 
+Both commands use MIDI channel 1 and camera 0 by default. Use `--channel` or
+`--camera` to change them. Press `q` or Escape to quit.
+
 ![AK Hand Gesturing](3_HandGesture.png)
 
 ## Tips and Pitfalls
 
 The system is free and relatively easy to create and use, but here are a few difficulties that may arise:
-
-- **Python Version Pitfall:** mediapipe would not even install for me with Python 3.13 (current version as of writing).  I recommend a virtual environment with 3.12 if your installation fails
 
 - **LoopMIDI Port Naming Bug:** You will have to name your port in loopMIDI and use that same name in the code.  HOWEVER, for me, the port was created slightly different from how I typed it ("PythonMIDI 3" instead of "PythonMIDI").  I included a print statement to show the available ports, so be sure to check the terminal if the script fails before video capture initiates
 
@@ -103,12 +83,9 @@ I don't anticipate building on this much.  It's basically mediapipe and mido wor
 
 - My **metrics for signals** are somewhat imprecise and taxing. "Finger closedness" is calculated based on fingertip-to-wrist distance which is both (1) vulnerable to the hand's forward angle with the camera and (2) requires mapping to bridge the remaining gap for even a fully folded finger.  A different node association could be used, but that would still not be robust to angling (though perhaps the wrist angle could be feel natural as another dimension of control).  And the wrist's vertical position requires it to be raised uncomfortably high throughout my video.  Perhaps a secondary gesture could trigger a lock on the wrist position's influence?
 
-- **Recognizable gestures** (e.g., peace, rock on) and **speed-based control** (e.g., wrist flick) are also within reason.  Though I couldn't be bothered to investigate, I imagine mediapipe or another library has a gesture recognition model that could be employed rather than working from scratch.  Similarly, if a whole-body model is as robust as the hand model, I imagine that could present some interesting (if exhausting) possibilities
-
 - **IRL Lighting Control** can easily [citation needed] be controlled through MIDI-out (i.e., sending MIDI from your computer to a connected device).  Perhaps the simplest case is triggering lighting on a MIDI controller with controllable LED pads like the Novation Launchkey 49 (e.g., MaddyGuthridge's [universal controller script](https://github.com/MaddyGuthridge/Universal-Controller-Script)).  With a MIDI-to-DMX interface (e.g., Entecc's [Open DMX USB interface](https://www.enttec.com/product/dmx-usb-interfaces/open-dmx-usb/)), this idea can scale into a complex, professional lighting setup (e.g., using FL's ZGE DMX controller as demonsted in [this video](https://youtu.be/rrQGiYoXmlo)).  I can envision clapping for blackouts, finger-pointing a spotlight to move corresponding direction, and a wrist flick for strobe effects with color, intensity, and speed mapped to horizontal resting position. The possibilities are endless, though obviously the cost of the hardware and the time spent implementing and troubleshooting are not.
 
 - **Sending non-control data** like note-on/off messages.  Certainly any percussive or otherwise transient-heavy triggered audio would suffer from the latency of this method, but I can imagine perhaps a slow-attack pad feeling satisfying.  Alternatively, a simple trigger can be made to trigger a more complex orchestration of sounds and effects using FL's `Patcher` and `Key Mapper` plugins to generate multi-instrument chords, arpeggios, bass, etc. (as demonstrated [here](https://youtu.be/1eidT2TAIt8) for my FRK AutoChords Patcher preset).  Though not shown in the video, I can imagine using FL's quantization to force the imprecise timing on the the grid for a more polished sound for recording or live performance.  Speaking of which, FL's native 'Performance Mode' fit the bill nicely, perhaps using the CC values in 'latch trigger' mode, switching binary state beyond a certain threshold with some kind of 'de-bounce' logic.
 
 ### to-do
  - get working with resolume
- - containerize for mac
